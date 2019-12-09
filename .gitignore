@@ -3,3 +3,4 @@ data/*
 /mlflow_tutorials.egg-info/
 __pycache__/
 /artifacts/
+/workflow/mlruns/
