@@ -14,13 +14,11 @@
 import os
 
 import pandas as pd
-from prefect import task
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
 
-@task
-def train(**kwargs):
+def train():
 
     # data path
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -56,3 +54,7 @@ def train(**kwargs):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/pca'))
     pca_df.to_parquet(output_path)
+
+
+if __name__ == '__main__':
+    train()

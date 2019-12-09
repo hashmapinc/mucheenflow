@@ -15,13 +15,11 @@ import os
 
 import dill as pickle
 import pandas as pd
-from prefect import task
 
 from sklearn.linear_model import LinearRegression
 
 
-@task
-def serve(**kwargs):
+def serve():
 
     # Retrieve model
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -48,3 +46,7 @@ def serve(**kwargs):
     output_path = os.path.realpath(os.path.join(local_path, '../data/serve/superconduct/lr_predictions.csv'))
 
     test_data.to_csv(output_path)
+
+
+if __name__ == '__main__':
+    serve()

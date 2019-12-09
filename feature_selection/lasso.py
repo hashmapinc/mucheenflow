@@ -14,14 +14,12 @@
 import os
 
 import pandas as pd
-from prefect import task
 
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import Lasso
 
 
-@task
-def train(**kwargs):
+def train():
 
     # set the data paths
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -56,3 +54,7 @@ def train(**kwargs):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/selected/superconduct/lasso'))
     data_engineered.to_parquet(output_path)
+
+
+if __name__ == '__main__':
+    train()

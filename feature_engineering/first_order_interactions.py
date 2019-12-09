@@ -19,8 +19,7 @@ from prefect import task
 from sklearn import preprocessing
 
 
-@task
-def train(**kwargs):
+def train():
 
     # data paths
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -66,3 +65,7 @@ def train(**kwargs):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/interactions'))
     interaction_df.to_parquet(output_path)
+
+
+if __name__ == '__main__':
+    train()

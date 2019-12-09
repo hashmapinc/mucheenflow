@@ -14,7 +14,6 @@
 import os
 
 import pandas as pd
-from prefect import task
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
@@ -22,8 +21,7 @@ from sklearn.model_selection import train_test_split
 import dill as pickle
 
 
-@task
-def train(**kwargs):
+def train():
 
     # set data paths
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -55,3 +53,7 @@ def train(**kwargs):
 
     with open(pickle_path, 'wb') as pickle_file:
         pickle.dump(reg, pickle_file)
+
+
+if __name__ == '__main__':
+    train()
