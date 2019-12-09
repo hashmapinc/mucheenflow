@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "mlflow-tutorials"
+version = "0.1.0"
+description = "Test project for demonstrating mlflow, prefect and other functionalities."
+authors = ["John Aven (snoodleboot) <john.aven@hashmapinc.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+mlflow = "^1.4"
+pycurl = "^7.43"
+scikit_learn = "^0.22.0"
+seaborn = "^0.9.0"
+pyarrow = "^0.15.1"
+prefect = "^0.7.3"
+dill = "^0.3.1"
+fsspec = "^0.6.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^3.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

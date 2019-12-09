@@ -1,0 +1,29 @@
+# Modifications © 2019 Hashmap, Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: '3.7'
+services:
+  jupyter:
+    image: jupyter/datascience-notebook:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - type: bind
+        source: ./notebooks
+        target: /home/jovyan/work
+      - type: bind
+        source: ../data
+        target: /home/jovyan/work/data
+    environment:
+      - JUPYTER_ENABLE_LAB=yes

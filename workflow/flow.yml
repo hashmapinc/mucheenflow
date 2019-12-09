@@ -1,0 +1,80 @@
+# Modifications © 2019 Hashmap, Inc
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+version: 1
+
+workflows:
+  - pipeline:
+      name: data_pipelines
+      stages:
+        - stage:
+            name: get_superconductor
+            file: phase_0.py
+            method: run
+
+  - pipeline:
+      name: feature_engineering
+      stages:
+        - stage:
+            name: pca
+            depends_on: get_superconductor
+            file: pca.py
+            method: train
+        - stage:
+            name: first_order_interactions
+            depends_on: pca
+            file: first_order_interactions.py
+            method: train
+
+  - pipeline:
+      name: feature_selection
+      stages:
+        - stage:
+            name: lasso
+            depends_on: first_order_interactions
+            file: lasso.py
+            method: train
+
+  - pipeline:
+      name: modeling
+      stages:
+        - stage:
+            name: split
+            depends_on: lasso
+            file: split.py
+            method: train
+        - stage:
+            name: linear_regression
+            depends_on: split
+            file: linear_regression.py
+            method: train
+        - stage:
+            name: random_forest_regression
+            depends_on: split
+            file: random_forest_regression.py
+            method: train
+
+  - pipeline:
+      name: serve
+      stages:
+        - stage:
+            name: serve_lr
+            depends_on: linear_regression
+            file: serve_lr.py
+            method: serve
+        - stage:
+            name: serve_rf
+            depends_on: random_forest_regression
+            file: serve_rf.py
+            method: serve
