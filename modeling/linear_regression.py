@@ -64,6 +64,7 @@ def train(**kwargs):
             }
         )
 
+        mlflow.sklearn.log_model(reg, 'lr_model')
         mlflow.set_tags(
             {
                 'model': 'linear_regression'
