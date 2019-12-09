@@ -41,5 +41,4 @@ def serve(**kwargs):
     if not os.path.exists(output_path):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/serve/superconduct/lr_predictions.csv'))
-    print(test_data)
     test_data.to_csv(output_path)
