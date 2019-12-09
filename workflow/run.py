@@ -13,6 +13,7 @@
 # limitations under the License.
 from importlib import import_module
 
+import mlflow
 import yaml
 import traceback
 from prefect import Flow
@@ -83,6 +84,11 @@ def main():
                         add_task(pipe, task_registry)
                         pipes.remove(pipe)
                         pacified_tasks.append(pipe['name'])
+
+        try:
+            mlflow.create_experiment('test')
+        except Exception:
+            pass
 
         # Execute the pipeline
         flow.run()

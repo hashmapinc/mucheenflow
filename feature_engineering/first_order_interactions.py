@@ -13,6 +13,7 @@
 # limitations under the License.
 import os
 
+import mlflow
 import pandas as pd
 from prefect import task
 
@@ -46,23 +47,31 @@ def train(**kwargs):
     del data_raw
     del data_pca
 
-    columns = ['{left}_times_{right}'.format(left=left, right=right) for left in data.columns for right in data.columns]
-    interaction_df = pd.DataFrame(
-        [
-            data[left] * data[right] for left in data.columns for right in data.columns
-        ],
-        columns
-    ).T
+    with mlflow.start_run(experiment_id=1):
+        columns = ['{left}_times_{right}'.format(left=left, right=right) for left in data.columns for right in data.columns]
+        interaction_df = pd.DataFrame(
+            [
+                data[left] * data[right] for left in data.columns for right in data.columns
+            ],
+            columns
+        ).T
 
-    # Clean up data
-    del data
+        # Clean up data
+        del data
 
-    # Add the target column back in
-    interaction_df['critical_temp'] = target
+        # Add the target column back in
+        interaction_df['critical_temp'] = target
 
-    # Save output to parquet
-    output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct'))
-    if not os.path.exists(output_path):
-        os.makedirs(output_path, exist_ok=True)
-    output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/interactions'))
-    interaction_df.to_parquet(output_path)
+        # Save output to parquet
+        output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct'))
+        if not os.path.exists(output_path):
+            os.makedirs(output_path, exist_ok=True)
+        output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/interactions'))
+        interaction_df.to_parquet(output_path)
+
+        mlflow.log_artifact(output_path, 'first_order_interactions')
+        mlflow.set_tags(
+            {
+                'model': 'first_order_interactions'
+            }
+        )

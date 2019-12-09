@@ -13,25 +13,20 @@
 # limitations under the License.
 import os
 
-import dill as pickle
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from prefect import task
-
-from sklearn.linear_model import LinearRegression
 
 
 @task
 def serve(**kwargs):
 
-    # Retrieve model
+    mlflow.set_experiment(experiment_name='test')
+    run_id = mlflow.search_runs(filter_string="tags.model = 'lr_model'")['run_id'][0]
+    model = mlflow.sklearn.load_model('runs:/{run_id}/lr_model'.format(run_id=run_id))
+
     local_path = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.realpath(os.path.join(local_path, '../artifacts/modeling/linear_regression.pkl'))
-
-    with open(model_path, 'rb') as model_file:
-        model = pickle.load(model_file)
-        if not isinstance(model, LinearRegression):
-            raise TypeError
-
     testing_data_path = os.path.realpath(os.path.join(local_path, '../data/split/superconduct/holdout'))
     test_data = pd.read_parquet(testing_data_path)
     target = test_data.loc[:, ['critical_temp']]
@@ -46,5 +41,5 @@ def serve(**kwargs):
     if not os.path.exists(output_path):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/serve/superconduct/lr_predictions.csv'))
-
+    print(test_data)
     test_data.to_csv(output_path)

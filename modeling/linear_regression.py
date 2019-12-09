@@ -13,13 +13,14 @@
 # limitations under the License.
 import os
 
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from prefect import task
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 from sklearn.model_selection import train_test_split
-import dill as pickle
 
 
 @task
@@ -34,24 +35,37 @@ def train(**kwargs):
     target = data.loc[:, ['critical_temp']]
     data = data.loc[:, data.columns[:-1]]
 
-    data_train, data_test, target_train, target_test = train_test_split(data, target, test_size=0.1, random_state=42)
+    with mlflow.start_run(experiment_id=1):
 
-    reg = LinearRegression().fit(data_train, target_train)
+        split_size = 0.1
+        random_state = 42
+        data_train, data_test, target_train, target_test = train_test_split(data,
+                                                                            target,
+                                                                            test_size=split_size,
+                                                                            random_state=random_state)
 
-    reg.score(data_train, target_train)
+        reg = LinearRegression().fit(data_train, target_train)
 
-    print('regression coefficients: ', reg.coef_)
+        score = reg.score(data_train, target_train)
 
-    print('regression intercept: ', reg.intercept_)
+        mse = mean_squared_error(reg.predict(data_test), target_test.values)
 
-    print('MSE: ', mean_squared_error(reg.predict(data_test), target_test.values))
+        mlflow.log_metrics(
+            {
+                'score': score,
+                'MSE': mse
+            }
+        )
 
-    # Persist the model
-    local_path = os.path.dirname(os.path.abspath(__file__))
-    pickle_path = os.path.realpath(os.path.join(local_path, '../artifacts/modeling'))
-    if not os.path.exists(pickle_path):
-        os.makedirs(pickle_path, exist_ok=True)
-    pickle_path = os.path.realpath(os.path.join(local_path, '../artifacts/modeling/linear_regression.pkl'))
+        mlflow.log_params(
+            {
+                'train_test_split_size': split_size,
+                'train_test_split_random_state': random_state
+            }
+        )
 
-    with open(pickle_path, 'wb') as pickle_file:
-        pickle.dump(reg, pickle_file)
+        mlflow.set_tags(
+            {
+                'model': 'linear_regression'
+            }
+        )
