@@ -23,9 +23,9 @@ from prefect import task
 def serve(**kwargs):
 
     # Retrieve model
-    mlflow.set_experiment(experiment_name='test')
-    run_id = mlflow.search_runs(filter_string="tags.model = 'lr_model'")['run_id'][0]
-    model = mlflow.sklearn.load_model('runs:/{run_id}/lr_model'.format(run_id=run_id))
+    # mlflow.set_experiment(experiment_name='default')
+    run_id = mlflow.search_runs(filter_string="tags.model = 'random_forest_regression'")['run_id'][0]
+    model = mlflow.sklearn.load_model('runs:/{run_id}/rf_model'.format(run_id=run_id))
 
     local_path = os.path.dirname(os.path.abspath(__file__))
     testing_data_path = os.path.realpath(os.path.join(local_path, '../data/split/superconduct/holdout'))

@@ -22,8 +22,8 @@ from prefect import task
 @task
 def serve(**kwargs):
 
-    mlflow.set_experiment(experiment_name='test')
-    run_id = mlflow.search_runs(filter_string="tags.model = 'lr_model'")['run_id'][0]
+    # mlflow.set_experiment(experiment_name='default')
+    run_id = mlflow.search_runs(filter_string="tags.model = 'linear_regression'")['run_id'][0]
     model = mlflow.sklearn.load_model('runs:/{run_id}/lr_model'.format(run_id=run_id))
 
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -41,5 +41,4 @@ def serve(**kwargs):
     if not os.path.exists(output_path):
         os.makedirs(output_path, exist_ok=True)
     output_path = os.path.realpath(os.path.join(local_path, '../data/serve/superconduct/lr_predictions.csv'))
-    print(test_data)
     test_data.to_csv(output_path)

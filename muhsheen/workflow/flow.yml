@@ -16,7 +16,7 @@ version: 1
 
 workflows:
   - pipeline:
-      name: data_pipelines
+      name: muhsheen.data_pipelines
       stages:
         - stage:
             name: get_superconductor
@@ -24,7 +24,7 @@ workflows:
             method: run
 
   - pipeline:
-      name: feature_engineering
+      name: muhsheen.feature_engineering
       stages:
         - stage:
             name: pca
@@ -38,7 +38,7 @@ workflows:
             method: train
 
   - pipeline:
-      name: feature_selection
+      name: muhsheen.feature_selection
       stages:
         - stage:
             name: lasso
@@ -47,7 +47,7 @@ workflows:
             method: train
 
   - pipeline:
-      name: modeling
+      name: muhsheen.modeling
       stages:
         - stage:
             name: split
@@ -66,7 +66,7 @@ workflows:
             method: train
 
   - pipeline:
-      name: serve
+      name: muhsheen.serve
       stages:
         - stage:
             name: serve_lr

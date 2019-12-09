@@ -47,7 +47,7 @@ def train(**kwargs):
     del data_raw
     del data_pca
 
-    with mlflow.start_run(experiment_id=1):
+    with mlflow.start_run(experiment_id=0):
         columns = ['{left}_times_{right}'.format(left=left, right=right) for left in data.columns for right in data.columns]
         interaction_df = pd.DataFrame(
             [

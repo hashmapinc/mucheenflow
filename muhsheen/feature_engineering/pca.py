@@ -42,7 +42,7 @@ def train(**kwargs):
     # remove old data - garbage collection
     del data
 
-    with mlflow.start_run(experiment_id=1):
+    with mlflow.start_run(experiment_id=0):
         # Standardize the data
         scaler = StandardScaler()
         train_df = pd.DataFrame(scaler.fit_transform(train_df))

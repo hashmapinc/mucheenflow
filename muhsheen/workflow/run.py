@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
 from importlib import import_module
 
 import mlflow
@@ -36,7 +37,7 @@ def add_task(pipe, task_registry):
 def main():
 
     # Load configuration
-    with open("flow.yml", 'r') as stream:
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "flow.yml"), 'r') as stream:
         try:
             config = yaml.safe_load(stream)
         except yaml.YAMLError:
@@ -87,8 +88,10 @@ def main():
 
         try:
             mlflow.create_experiment('test')
-        except Exception:
-            pass
+        except Exception as ex:
+            print(ex)
+        finally:
+            mlflow.set_experiment(experiment_name='test')
 
         # Execute the pipeline
         flow.run()

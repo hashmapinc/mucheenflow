@@ -17,8 +17,7 @@ import mlflow
 import mlflow.sklearn
 import pandas as pd
 from prefect import task
-
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 
 from sklearn.model_selection import train_test_split
@@ -36,22 +35,20 @@ def train(**kwargs):
     target = data.loc[:, ['critical_temp']]
     data = data.loc[:, data.columns[:-1]]
 
-    with mlflow.start_run(experiment_id=1):
+    with mlflow.start_run(experiment_id=0):
+
         split_size = 0.1
-        random_state_train_test = 42
+        random_state = 42
         data_train, data_test, target_train, target_test = train_test_split(data,
                                                                             target,
                                                                             test_size=split_size,
-                                                                            random_state=random_state_train_test)
+                                                                            random_state=random_state)
 
-        n_estimators = 10
-        random_state_rf = 42
-        reg = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state_rf)\
-            .fit(data_train, target_train.values.ravel())
+        reg = LinearRegression().fit(data_train, target_train)
 
         score = reg.score(data_train, target_train)
 
-        mse = mean_squared_error(reg.predict(data_test), target_test.values.ravel())
+        mse = mean_squared_error(reg.predict(data_test), target_test.values)
 
         mlflow.log_metrics(
             {
@@ -63,16 +60,13 @@ def train(**kwargs):
         mlflow.log_params(
             {
                 'train_test_split_size': split_size,
-                'train_test_split_random_state': random_state_train_test,
-                'rf_n_estimators': n_estimators,
-                'random_state': random_state_rf
+                'train_test_split_random_state': random_state
             }
         )
 
-        mlflow.sklearn.log_model(reg, 'rf_model')
-
+        mlflow.sklearn.log_model(reg, 'lr_model')
         mlflow.set_tags(
             {
-                'model': 'random_forest_regression'
+                'model': 'linear_regression'
             }
         )

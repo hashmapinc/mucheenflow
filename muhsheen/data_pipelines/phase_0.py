@@ -15,7 +15,6 @@
 # Please reference the following: http://archive.ics.uci.edu/ml/datasets/Superconductivty+Data#
 
 import os
-import shutil
 import zipfile
 
 import pycurl
