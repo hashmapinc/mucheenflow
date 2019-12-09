@@ -14,13 +14,11 @@
 import os
 
 import pandas as pd
-from prefect import task
 
 from sklearn.model_selection import train_test_split
 
 
-@task
-def train(**kwargs):
+def train():
 
     # set the data paths
     local_path = os.path.dirname(os.path.abspath(__file__))
@@ -40,3 +38,7 @@ def train(**kwargs):
     output_path_holdout = os.path.realpath(os.path.join(local_path, '../data/split/superconduct/holdout'))
     pd.DataFrame(data_train_test).to_parquet(output_path_train)
     pd.DataFrame(data_holdout).to_parquet(output_path_holdout)
+
+
+if __name__ == '__main__':
+    train()
