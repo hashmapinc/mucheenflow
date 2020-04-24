@@ -22,9 +22,6 @@ from sklearn.metrics import mean_squared_error
 
 from sklearn.model_selection import train_test_split
 
-from dask.distributed import Client
-import joblib
-
 
 @task
 def train(**kwargs):
@@ -39,38 +36,37 @@ def train(**kwargs):
     data = data.loc[:, data.columns[:-1]]
 
     with mlflow.start_run(experiment_id=1):
-        client = Client()
-        with joblib.parallel_backend('dask'):
-            split_size = 0.1
-            random_state = 42
-            data_train, data_test, target_train, target_test = train_test_split(data,
-                                                                                target,
-                                                                                test_size=split_size,
-                                                                                random_state=random_state)
 
-            reg = LinearRegression().fit(data_train, target_train)
+        split_size = 0.1
+        random_state = 42
+        data_train, data_test, target_train, target_test = train_test_split(data,
+                                                                            target,
+                                                                            test_size=split_size,
+                                                                            random_state=random_state)
 
-            score = reg.score(data_train, target_train)
+        reg = LinearRegression().fit(data_train, target_train)
 
-            mse = mean_squared_error(reg.predict(data_test), target_test.values)
+        score = reg.score(data_train, target_train)
 
-            mlflow.log_metrics(
-                {
-                    'score': score,
-                    'MSE': mse
-                }
-            )
+        mse = mean_squared_error(reg.predict(data_test), target_test.values)
 
-            mlflow.log_params(
-                {
-                    'train_test_split_size': split_size,
-                    'train_test_split_random_state': random_state
-                }
-            )
+        mlflow.log_metrics(
+            {
+                'score': score,
+                'MSE': mse
+            }
+        )
 
-            mlflow.sklearn.log_model(reg, 'lr_model')
-            mlflow.set_tags(
-                {
-                    'model': 'linear_regression'
-                }
-            )
+        mlflow.log_params(
+            {
+                'train_test_split_size': split_size,
+                'train_test_split_random_state': random_state
+            }
+        )
+
+        mlflow.sklearn.log_model(reg, 'lr_model')
+        mlflow.set_tags(
+            {
+                'model': 'linear_regression'
+            }
+        )

@@ -21,8 +21,6 @@ from prefect import task
 from sklearn.feature_selection import SelectFromModel
 from sklearn.linear_model import Lasso
 
-from dask.distributed import Client
-import joblib
 
 @task
 def train(**kwargs):
@@ -37,49 +35,47 @@ def train(**kwargs):
     data_engineered = data_engineered.loc[:, data_engineered.columns[:-1]]
 
     with mlflow.start_run(experiment_id=1):
-        client = Client()
-        with joblib.parallel_backend('dask'):
-            # Retain the columns, these are needed to be added back in after the model has been trained,
-            # and the features have been selected
-            features = data_engineered.columns
+        # Retain the columns, these are needed to be added back in after the model has been trained,
+        # and the features have been selected
+        features = data_engineered.columns
 
-            # Train the model selector
-            lasso_alpha = 0.35
-            lasso_precompute = True
-            lasso_max_iter = 50
-            clf = Lasso(alpha=lasso_alpha,
-                        precompute=lasso_precompute,
-                        max_iter=lasso_max_iter)
-            model = SelectFromModel(clf, threshold=0.25)
-            model.fit(data_engineered, target['critical_temp'].values)
+        # Train the model selector
+        lasso_alpha = 0.35
+        lasso_precompute = True
+        lasso_max_iter = 50
+        clf = Lasso(alpha=lasso_alpha,
+                    precompute=lasso_precompute,
+                    max_iter=lasso_max_iter)
+        model = SelectFromModel(clf, threshold=0.25)
+        model.fit(data_engineered, target['critical_temp'].values)
 
-            # Apply the model selector
-            data_engineered = pd.DataFrame(
-                model.transform(data_engineered)
-            )
-            data_engineered.columns = [feature for support, feature in zip(model.get_support(), features) if support]
+        # Apply the model selector
+        data_engineered = pd.DataFrame(
+            model.transform(data_engineered)
+        )
+        data_engineered.columns = [feature for support, feature in zip(model.get_support(), features) if support]
 
-            # Append target column back onto dataset
-            data_engineered['critical_temp'] = target
+        # Append target column back onto dataset
+        data_engineered['critical_temp'] = target
 
-            # Write the results to parquet
-            output_path = os.path.realpath(os.path.join(local_path, '../data/selected/superconduct'))
-            if not os.path.exists(output_path):
-                os.makedirs(output_path, exist_ok=True)
-            output_path = os.path.realpath(os.path.join(local_path, '../data/selected/superconduct/lasso'))
-            data_engineered.to_parquet(output_path)
+        # Write the results to parquet
+        output_path = os.path.realpath(os.path.join(local_path, '../data/selected/superconduct'))
+        if not os.path.exists(output_path):
+            os.makedirs(output_path, exist_ok=True)
+        output_path = os.path.realpath(os.path.join(local_path, '../data/selected/superconduct/lasso'))
+        data_engineered.to_parquet(output_path)
 
-            mlflow.log_params(
-                {
-                    'lasso_alpha': lasso_alpha,
-                    'lasso_precompute': lasso_precompute,
-                    'lasso_max_iter': lasso_max_iter
-                }
-            )
+        mlflow.log_params(
+            {
+                'lasso_alpha': lasso_alpha,
+                'lasso_precompute': lasso_precompute,
+                'lasso_max_iter': lasso_max_iter
+            }
+        )
 
-            mlflow.sklearn.log_model(model, 'lasso')
-            mlflow.set_tags(
-                {
-                    'model': 'lasso'
-                }
-            )
+        mlflow.sklearn.log_model(model, 'lasso')
+        mlflow.set_tags(
+            {
+                'model': 'lasso'
+            }
+        )

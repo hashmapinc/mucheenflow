@@ -23,9 +23,6 @@ from sklearn.metrics import mean_squared_error
 
 from sklearn.model_selection import train_test_split
 
-from dask.distributed import Client
-import joblib
-
 
 @task
 def train(**kwargs):
@@ -40,46 +37,42 @@ def train(**kwargs):
     data = data.loc[:, data.columns[:-1]]
 
     with mlflow.start_run(experiment_id=1):
+        split_size = 0.1
+        random_state_train_test = 42
+        data_train, data_test, target_train, target_test = train_test_split(data,
+                                                                            target,
+                                                                            test_size=split_size,
+                                                                            random_state=random_state_train_test)
 
-        client = Client()
-        with joblib.parallel_backend('dask'):
+        n_estimators = 10
+        random_state_rf = 42
+        reg = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state_rf)\
+            .fit(data_train, target_train.values.ravel())
 
-            split_size = 0.1
-            random_state_train_test = 42
-            data_train, data_test, target_train, target_test = train_test_split(data,
-                                                                                target,
-                                                                                test_size=split_size,
-                                                                                random_state=random_state_train_test)
+        score = reg.score(data_train, target_train)
 
-            n_estimators = 10
-            random_state_rf = 42
-            reg = RandomForestRegressor(n_estimators=n_estimators, random_state=random_state_rf)\
-                .fit(data_train, target_train.values.ravel())
+        mse = mean_squared_error(reg.predict(data_test), target_test.values.ravel())
 
-            score = reg.score(data_train, target_train)
+        mlflow.log_metrics(
+            {
+                'score': score,
+                'MSE': mse
+            }
+        )
 
-            mse = mean_squared_error(reg.predict(data_test), target_test.values.ravel())
+        mlflow.log_params(
+            {
+                'train_test_split_size': split_size,
+                'train_test_split_random_state': random_state_train_test,
+                'rf_n_estimators': n_estimators,
+                'random_state': random_state_rf
+            }
+        )
 
-            mlflow.log_metrics(
-                {
-                    'score': score,
-                    'MSE': mse
-                }
-            )
+        mlflow.sklearn.log_model(reg, 'rf_model')
 
-            mlflow.log_params(
-                {
-                    'train_test_split_size': split_size,
-                    'train_test_split_random_state': random_state_train_test,
-                    'rf_n_estimators': n_estimators,
-                    'random_state': random_state_rf
-                }
-            )
-
-            mlflow.sklearn.log_model(reg, 'rf_model')
-
-            mlflow.set_tags(
-                {
-                    'model': 'random_forest_regression'
-                }
-            )
+        mlflow.set_tags(
+            {
+                'model': 'random_forest_regression'
+            }
+        )
