@@ -95,4 +95,10 @@ def main():
 
 
 if __name__ == '__main__':
+
+    import datetime
+    start = datetime.datetime.now()
     main()
+    stop = datetime.datetime.now()
+
+    print(stop-start)

@@ -20,6 +20,9 @@ from prefect import task
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
+from dask.distributed import Client
+import joblib
+
 
 @task
 def train(**kwargs):
@@ -43,36 +46,38 @@ def train(**kwargs):
     del data
 
     with mlflow.start_run(experiment_id=1):
-        # Standardize the data
-        scaler = StandardScaler()
-        train_df = pd.DataFrame(scaler.fit_transform(train_df))
+        client = Client()
+        with joblib.parallel_backend('dask'):
+            # Standardize the data
+            scaler = StandardScaler()
+            train_df = pd.DataFrame(scaler.fit_transform(train_df))
 
-        # Apply PCA
-        num_pca_components = 20
-        pca = PCA(n_components=num_pca_components)
-        pca_df = pd.DataFrame(pca.fit_transform(train_df))
+            # Apply PCA
+            num_pca_components = 20
+            pca = PCA(n_components=num_pca_components)
+            pca_df = pd.DataFrame(pca.fit_transform(train_df))
 
-        # Make sure that there are columns
-        pca_df.columns = ['pca_{index}'.format(index=index) for index in pca_df.columns]
+            # Make sure that there are columns
+            pca_df.columns = ['pca_{index}'.format(index=index) for index in pca_df.columns]
 
-        # Save output to parquet
-        output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct'))
-        if not os.path.exists(output_path):
-            os.makedirs(output_path, exist_ok=True)
-        output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/pca'))
-        pca_df.to_parquet(output_path)
+            # Save output to parquet
+            output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct'))
+            if not os.path.exists(output_path):
+                os.makedirs(output_path, exist_ok=True)
+            output_path = os.path.realpath(os.path.join(local_path, '../data/engineered/superconduct/pca'))
+            pca_df.to_parquet(output_path)
 
-        # log scaler, pca, columns and num_pca_components
-        mlflow.log_params(
-            {
-                'num_pca_components': num_pca_components
-            }
-        )
-        mlflow.sklearn.log_model(scaler, 'scaler_pre_pca')
-        mlflow.sklearn.log_model(pca, 'pca')
-        mlflow.log_artifact(output_path, 'pca')
-        mlflow.set_tags(
-            {
-                'model': 'pca'
-            }
-        )
+            # log scaler, pca, columns and num_pca_components
+            mlflow.log_params(
+                {
+                    'num_pca_components': num_pca_components
+                }
+            )
+            mlflow.sklearn.log_model(scaler, 'scaler_pre_pca')
+            mlflow.sklearn.log_model(pca, 'pca')
+            mlflow.log_artifact(output_path, 'pca')
+            mlflow.set_tags(
+                {
+                    'model': 'pca'
+                }
+            )
