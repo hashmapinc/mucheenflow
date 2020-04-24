@@ -995,7 +995,6 @@ socks = ["PySocks (>=1.5.6,<1.5.7 || >1.5.7,<2.0)"]
 [[package]]
 category = "main"
 description = "Waitress WSGI server"
-marker = "platform_system == \"Windows\""
 name = "waitress"
 optional = false
 python-versions = "*"
@@ -1053,7 +1052,7 @@ docs = ["sphinx", "jaraco.packaging (>=3.2)", "rst.linker (>=1.9)"]
 testing = ["jaraco.itertools", "func-timeout"]
 
 [metadata]
-content-hash = "69023d570ef1f42a640c684c43090ceebd18002e3ec6d51cc361c58e48f42207"
+content-hash = "133ce0a6289e54433000ec0dfaf5ad7d817bb470461635f10ac45a0ed13a477f"
 python-versions = "^3.7"
 
 [metadata.files]
