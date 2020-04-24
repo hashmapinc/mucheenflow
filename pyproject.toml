@@ -14,6 +14,7 @@ pyarrow = "^0.15.1"
 prefect = "^0.7.3"
 dill = "^0.3.1"
 fsspec = "^0.6.1"
+waitress = ">=1.4.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^3.0"
