@@ -23,7 +23,7 @@ from prefect import task
 def serve(**kwargs):
 
     mlflow.set_experiment(experiment_name='test')
-    run_id = mlflow.search_runs(filter_string="tags.model = 'lr_model'")['run_id'][0]
+    run_id = mlflow.search_runs(filter_string="tags.model = 'linear_regression'")['run_id'][0]
     model = mlflow.sklearn.load_model('runs:/{run_id}/lr_model'.format(run_id=run_id))
 
     local_path = os.path.dirname(os.path.abspath(__file__))
