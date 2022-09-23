@@ -43,7 +43,7 @@ pluggy==0.13.1
 prefect==0.7.3
 prometheus-client==0.7.1
 prometheus-flask-exporter==0.13.0
-protobuf==3.11.3
+protobuf==3.18.3
 psutil==5.7.0
 py==1.8.1
 pyarrow==0.15.1
